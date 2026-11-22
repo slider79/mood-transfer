@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useRef, useState, type CSSProperties, type ReactNode } from 'react'
 
 export type ViewMode = 'graded' | 'baseline' | 'original' | 'split'
 
@@ -14,30 +14,8 @@ type Props = {
   empty?: ReactNode
 }
 
-// container mein image ka aspect fit karo, contain jaisa
-function useFit(aspect: number | null) {
-  const box = useRef<HTMLDivElement>(null)
-  const [size, setSize] = useState({ w: 0, h: 0 })
-  useEffect(() => {
-    const el = box.current
-    if (!el || !aspect) return
-    const measure = () => {
-      const bw = el.clientWidth
-      const bh = el.clientHeight
-      if (bw / bh > aspect) setSize({ w: bh * aspect, h: bh })
-      else setSize({ w: bw, h: bw / aspect })
-    }
-    measure()
-    const ro = new ResizeObserver(measure)
-    ro.observe(el)
-    return () => ro.disconnect()
-  }, [aspect])
-  return { box, size }
-}
-
 export default function Print(props: Props) {
   const { aspect, originalUrl, gradedUrl, baselineUrl, developingUrl, strength, mode, overlay, empty } = props
-  const { box, size } = useFit(aspect)
   const [split, setSplit] = useState(0.5)
   const dragging = useRef(false)
   const plate = useRef<HTMLDivElement>(null)
@@ -53,14 +31,14 @@ export default function Print(props: Props) {
 
   return (
     <div className="print-mat">
-      <div className="print-box" ref={box}>
+      <div className="print-box">
         {!aspect || !originalUrl ? (
           <div className="print-empty">{empty}</div>
         ) : (
           <div
             className="plate"
             ref={plate}
-            style={{ width: size.w, height: size.h }}
+            style={{ '--aspect': aspect } as CSSProperties}
             onPointerMove={(e) => dragging.current && moveSplit(e.clientX)}
             onPointerUp={() => (dragging.current = false)}
             onPointerLeave={() => (dragging.current = false)}

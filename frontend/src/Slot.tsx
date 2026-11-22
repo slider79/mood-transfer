@@ -1,9 +1,9 @@
 import { useRef, useState } from 'react'
-import { UploadIcon } from './Icons'
 import { useObjectUrl } from './useJob'
 
 type Props = {
   label: string
+  tag?: string
   hint: string
   file: File | null
   onFile: (f: File) => void
@@ -16,7 +16,7 @@ function prettySize(bytes: number) {
 }
 
 // ek "negative" slot: click karo ya file gira do
-export default function Slot({ label, hint, file, onFile, disabled }: Props) {
+export default function Slot({ label, tag, hint, file, onFile, disabled }: Props) {
   const input = useRef<HTMLInputElement>(null)
   const [over, setOver] = useState(false)
   const [bad, setBad] = useState(false)
@@ -61,11 +61,12 @@ export default function Slot({ label, hint, file, onFile, disabled }: Props) {
           <img src={url} alt={`${label} photo`} />
         ) : (
           <span className="slot-empty">
-            <UploadIcon />
-            <span>{hint}</span>
+            <span className="slot-tag num">{tag ?? 'NEG'}</span>
+            <span className="slot-sprockets" aria-hidden="true" />
           </span>
         )}
       </button>
+      {!file && <p className="slot-hint">{hint}</p>}
       {file && (
         <p className="slot-meta">
           <span className="slot-name">{file.name}</span>
