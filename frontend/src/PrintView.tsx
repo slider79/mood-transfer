@@ -10,7 +10,7 @@ import TestStrip from './TestStrip'
 import { useJob, useObjectUrl } from './useJob'
 
 const qualities = [
-  { value: 60, label: 'Quick, 60 steps, 20 to 45 s' },
+  { value: 60, label: 'Quick, 60 steps, 20 to 60 s' },
   { value: 120, label: 'Standard, 120 steps, 40 to 90 s' },
   { value: 200, label: 'Fine, 200 steps, 70 to 150 s' },
 ]
