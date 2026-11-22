@@ -46,11 +46,18 @@ backend/
   requirements.txt
 frontend/
   src/              React + Vite + TypeScript app (Print, Library, Method views)
+start.bat           Windows launcher (starts backend + frontend)
 ```
 
 ## Running it
 
 Needs Python 3.12 and Node 20 or newer. No GPU needed, everything runs on the CPU.
+
+### One-click start (Windows)
+
+Double-click `start.bat` (or run `.\start.bat` in a terminal). It checks dependencies, launches both backend and frontend servers, and opens the app at http://localhost:5173.
+
+### Manual start
 
 Backend:
 
