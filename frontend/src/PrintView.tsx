@@ -4,14 +4,15 @@ import { ContactSheet, LossChart, type Frame } from './ContactSheet'
 import { savePrintAtStrength } from './download'
 import { DownloadIcon, ExposeIcon, StopIcon, SwapIcon } from './Icons'
 import Print, { type ViewMode } from './Print'
+import { sampleFile, sampleUrl, samples } from './samples'
 import Slot from './Slot'
 import TestStrip from './TestStrip'
 import { useJob, useObjectUrl } from './useJob'
 
 const qualities = [
-  { value: 60, label: 'Quick, 60 steps, about 20 s' },
-  { value: 120, label: 'Standard, 120 steps, about 40 s' },
-  { value: 200, label: 'Fine, 200 steps, about 70 s' },
+  { value: 60, label: 'Quick, 60 steps, 20 to 45 s' },
+  { value: 120, label: 'Standard, 120 steps, 40 to 90 s' },
+  { value: 200, label: 'Fine, 200 steps, 70 to 150 s' },
 ]
 
 const modes: { value: ViewMode; label: string }[] = [
@@ -35,6 +36,7 @@ export default function PrintView({ onSaved }: { onSaved: () => void }) {
   const [mode, setMode] = useState<ViewMode>('graded')
   const [localAspect, setLocalAspect] = useState<number | null>(null)
   const [saving, setSaving] = useState<string | null>(null)
+  const [loadingSample, setLoadingSample] = useState<string | null>(null)
   const { job, error: pollError } = useJob(jobId)
   const contentUrl = useObjectUrl(content)
   const framesRef = useRef<Frame[]>([])
@@ -90,6 +92,24 @@ export default function PrintView({ onSaved }: { onSaved: () => void }) {
     clearFrames()
   }
 
+  const loadSample = async (id: string) => {
+    const s = samples.find((x) => x.id === id)
+    if (!s) return
+    setLoadingSample(id)
+    setStartError(null)
+    try {
+      const [c, m] = await Promise.all([sampleFile(s.content), sampleFile(s.mood)])
+      setContent(c)
+      setMoodPhoto(m)
+      setJobId(null)
+      clearFrames()
+    } catch (e) {
+      setStartError(e instanceof Error ? e.message : 'Could not load the sample.')
+    } finally {
+      setLoadingSample(null)
+    }
+  }
+
   const expose = async () => {
     if (!content || !moodPhoto) return
     setStartError(null)
@@ -137,8 +157,19 @@ export default function PrintView({ onSaved }: { onSaved: () => void }) {
   return (
     <div className="print-view">
       <aside className="col col-left" aria-label="Negatives and settings">
-        <h2 className="col-title">Negatives</h2>
-        <Slot label="Content photo" hint="Drop the photo to re-grade, or click to browse" file={content} onFile={pickContent} disabled={running} />
+        <h2 className="col-heading">Negatives</h2>
+        <div className="samples">
+          <p className="samples-label">Try a sample pair</p>
+          <div className="samples-row">
+            {samples.map((s) => (
+              <button key={s.id} className="sample" disabled={running || loadingSample !== null} onClick={() => loadSample(s.id)} aria-label={`Load sample pair: ${s.label}`} title={s.label}>
+                <img src={sampleUrl(s.content)} alt="" />
+                <img src={sampleUrl(s.mood)} alt="" />
+              </button>
+            ))}
+          </div>
+        </div>
+        <Slot label="Content photo" tag="NEG 01 / content" hint="Click or drop the photo to re-grade" file={content} onFile={pickContent} disabled={running} />
         <button
           className="swap-btn"
           disabled={running || !content || !moodPhoto}
@@ -152,7 +183,7 @@ export default function PrintView({ onSaved }: { onSaved: () => void }) {
         >
           <SwapIcon size={16} /> Swap photos
         </button>
-        <Slot label="Mood photo" hint="Drop the photo whose look you want" file={moodPhoto} onFile={pickMood} disabled={running} />
+        <Slot label="Mood photo" tag="NEG 02 / mood" hint="Click or drop the photo whose look you want" file={moodPhoto} onFile={pickMood} disabled={running} />
 
         <div className="settings">
           <label className="field">
@@ -169,7 +200,7 @@ export default function PrintView({ onSaved }: { onSaved: () => void }) {
             <input type="checkbox" checked={lightGrid} disabled={running} onChange={(e) => setLightGrid(e.target.checked)} />
             <span>
               Light falloff grid
-              <small>Lets the grade brighten or darken regions, like a vignette or a glow.</small>
+              <small>Lets the grade add vignettes and glows.</small>
             </span>
           </label>
         </div>
@@ -177,7 +208,7 @@ export default function PrintView({ onSaved }: { onSaved: () => void }) {
         {running ? (
           <div className="expose-row">
             <div className="expose is-running" aria-live="polite">
-              <span className="pulse" aria-hidden="true" />
+              <span className="safelight-dot" aria-hidden="true" />
               {status}
             </div>
             <button className="ghost-btn" onClick={stop} aria-label="Stop the run">

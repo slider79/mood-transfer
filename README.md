@@ -82,6 +82,16 @@ For a single server (for example when deploying), build the frontend with `npm r
 - **Library**: every finished run is saved as a mood. Pick one and print any photo with it in about a second.
 - **Method**: a short write up of the method for the viva.
 
+## Sample pairs
+
+The Print view has three ready made pairs (cat photos as content, skies as mood) so the demo works without hunting for photos:
+
+- window tabby + sunrise clouds
+- cat portrait + magenta aurora
+- garden tabby + blue hour
+
+All six photos are CC0 (public domain dedication), found through Openverse. Sources and authors are listed in `frontend/public/samples/CREDITS.md`.
+
 ## API
 
 | Method | Path | What it does |
