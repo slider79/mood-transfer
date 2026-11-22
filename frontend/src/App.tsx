@@ -18,10 +18,7 @@ export default function App() {
   return (
     <div className="app">
       <header className="topbar">
-        <div className="brand">
-          <span className="brand-light" aria-hidden="true" />
-          Mood Transfer
-        </div>
+        <div className="brand">Mood Transfer</div>
         <nav className="tabs" aria-label="Views">
           {tabs.map((t) => (
             <button key={t.value} className={tab === t.value ? 'is-on' : ''} aria-current={tab === t.value ? 'page' : undefined} onClick={() => setTab(t.value)}>
@@ -29,7 +26,6 @@ export default function App() {
             </button>
           ))}
         </nav>
-        <p className="credit">DIP term project · FAST NUCES Lahore</p>
       </header>
 
       {/* print view hamesha mounted rehta hai taake tab badalne pe run gum na ho */}

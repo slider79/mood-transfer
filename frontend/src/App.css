@@ -29,14 +29,6 @@
   white-space: nowrap;
 }
 
-.brand-light {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--safelight);
-  box-shadow: 0 0 10px 2px rgba(196, 55, 42, 0.55);
-}
-
 .tabs {
   display: flex;
   gap: var(--space-1);
@@ -58,12 +50,6 @@
 .tabs button.is-on {
   color: var(--ink);
   border-bottom-color: var(--safelight);
-}
-
-.credit {
-  margin-left: auto;
-  color: var(--muted);
-  font-size: 13px;
 }
 
 .footer {
@@ -1033,9 +1019,6 @@
   .topbar {
     gap: var(--space-4);
     padding: 0 var(--space-4);
-  }
-  .credit {
-    display: none;
   }
   .print-view {
     display: flex;
