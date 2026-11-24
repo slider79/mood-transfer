@@ -1,5 +1,6 @@
 # FastAPI server: jobs queue, mood library, files
 import io
+import math
 import json
 import shutil
 import threading
@@ -35,10 +36,21 @@ jobs = {}
 jobsLock = threading.Lock()
 
 
+def clean(value):
+    # NaN/inf JSON mein nahi ja sakte, warna poora response 500 ho jata hai
+    if isinstance(value, float) and not math.isfinite(value):
+        return None
+    if isinstance(value, dict):
+        return {k: clean(v) for k, v in value.items()}
+    if isinstance(value, list):
+        return [clean(v) for v in value]
+    return value
+
+
 def publicJob(job):
     keys = ("id", "status", "step", "total", "losses", "history", "elapsed", "eta", "error", "moodId",
             "contentName", "moodName", "previewVersion", "queuedAt", "settings", "size")
-    return {k: job.get(k) for k in keys}
+    return clean({k: job.get(k) for k in keys})
 
 
 def saveView(img, path):

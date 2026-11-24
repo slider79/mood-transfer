@@ -119,14 +119,18 @@ def rgbToLab(pixels):
 
 
 def labToRgb(lab):
-    lms = 10 ** (lab @ labToLogLms.T)
-    return np.clip(lms @ lmsToRgb.T, 0, 1)
+    # log range clamp karo warna 10 ** bara number = inf, aur inf - inf = nan
+    logLms = np.clip(lab @ labToLogLms.T, -4, 0.5)
+    rgb = (10 ** logLms) @ lmsToRgb.T
+    return np.clip(np.nan_to_num(rgb, nan=0.0), 0, 1)
 
 
 def labStats(img):
     pixels = np.asarray(shrink(img, 512), dtype=np.float64).reshape(-1, 3) / 255.0
     lab = rgbToLab(pixels)
-    return lab.mean(0), lab.std(0) + 1e-6
+    # black and white photo mein alpha/beta ka std ~0 hota hai, us se divide = blow up
+    # isliye ek floor rakha hai
+    return lab.mean(0), np.maximum(lab.std(0), 0.02)
 
 
 def reinhard(pixels, srcStats, dstStats):
@@ -252,6 +256,8 @@ def transferMood(contentImg, moodImg, settings=None, onProgress=None, shouldStop
             regLoss = regLoss + lightSmoothness(gainGrid) * 5
 
         loss = s["styleWeight"] * styleLoss + s["contentWeight"] * contentLoss + s["colorWeight"] * colourLoss + regLoss
+        if not torch.isfinite(loss):
+            raise RuntimeError("The optimisation became unstable on this pair (NaN loss). Try another mood photo or turn the light grid off.")
         loss.backward()
         opt.step()
         with torch.no_grad():
